@@ -1,6 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.common.by import By
 from webdriver_manager.firefox import GeckoDriverManager
 import time
 
@@ -23,8 +24,8 @@ def setup_firefox_with_tor_proxy(tor_binary_path):
 
     return firefox_options
 
-# Function to download and save the entire HTML content from the Tor-based site
-def download_full_html_tor(url, output_file):
+# Function to download and save the HTML content for multiple pages
+def download_html_multiple_pages(url, output_file, max_pages):
     # Path to the Tor Browser's Firefox binary
     tor_browser_path = r'C:\<>\Tor Browser\Browser\firefox.exe'  # Replace with your actual path <>
 
@@ -38,16 +39,32 @@ def download_full_html_tor(url, output_file):
         # Navigate to the .onion URL
         driver.get(url)
 
-        # Wait for the page to fully load (adjust the sleep time as necessary)
-        time.sleep(10)  # Adjust based on how long the page takes to load
+        # Loop through n pages
+        for i in range(max_pages):
+            # Wait for the page to fully load (adjust the sleep time as necessary)
+            time.sleep(5)  # Adjust based on how long the page takes to load
 
-        # Get the full page source after rendering
-        page_source = driver.page_source
+            # Get the full page source after rendering
+            page_source = driver.page_source
 
-        # Save the HTML content to a file
-        with open(output_file, 'w', encoding='utf-8') as f:
-            f.write(page_source)
-        print(f"Successfully downloaded and saved the HTML content to {output_file}")
+            # Save the HTML content to a file (appending the page source to the same file for simplicity)
+            with open(output_file, 'a', encoding='utf-8') as f:
+                f.write(f"\n\n<!-- Page {i+1} -->\n\n")  # Add a page separator for clarity
+                f.write(page_source)
+            
+            print(f"Page {i+1} content downloaded and saved.")
+
+            # Try to click the "Next" button (replace the selector if needed)
+            try:
+                next_button = driver.find_element(By.CLASS_NAME, 'next-page-btn')
+                next_button.click()
+                print(f"Navigated to page {i+2}")
+            except Exception as e:
+                print(f"Could not find or click the next button on page {i+1}. Ending loop.")
+                break  # If there is no next button or we encounter an error, stop the loop
+
+            # Wait for the next page to load
+            time.sleep(5)
 
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -57,8 +74,9 @@ def download_full_html_tor(url, output_file):
 
 # Example usage
 if __name__ == '__main__':
-    onion_url = '<>'  # Replace with the actual .onion URL <>
-    output_filename = 'scraped_page.html'  # File to save the HTML content
+    onion_url = 'http://stniiomyjliimcgkvdszvgen3eaaoz55hreqqx6o77yvmpwt7gklffqd.onion/'  # Replace with the actual .onion URL <>
+    output_filename = './output/scraped_pages.html'  # File to save the HTML content for all pages
+    max_pages_to_scrape = 13  # Number of pages you want to scrape
 
-    # Download the full HTML content from the site
-    download_full_html_tor(onion_url, output_filename)
+    # Download the HTML content from multiple pages
+    download_html_multiple_pages(onion_url, output_filename, max_pages_to_scrape)
