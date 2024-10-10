@@ -26,7 +26,7 @@ def setup_firefox_with_tor_proxy(tor_binary_path):
 # Function to download and save the entire HTML content from the Tor-based site
 def download_full_html_tor(url, output_file):
     # Path to the Tor Browser's Firefox binary
-    tor_browser_path = r'C:\<>\Tor Browser\Browser\firefox.exe'  # Replace with your actual path <>
+    tor_browser_path = r'C:\Tor Browser\Browser\firefox.exe'  # Replace with your actual path <>
 
     # Get Firefox options configured with the Tor proxy and Tor binary path
     firefox_options = setup_firefox_with_tor_proxy(tor_browser_path)
@@ -57,7 +57,7 @@ def download_full_html_tor(url, output_file):
 
 # Example usage
 if __name__ == '__main__':
-    onion_url = '<>'  # Replace with the actual .onion URL <>
+    onion_url = 'http://stniiomyjliimcgkvdszvgen3eaaoz55hreqqx6o77yvmpwt7gklffqd.onion/'  # Replace with the actual .onion URL <>
     output_filename = 'scraped_page.html'  # File to save the HTML content
 
     # Download the full HTML content from the site
