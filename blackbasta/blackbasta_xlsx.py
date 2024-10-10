@@ -13,15 +13,21 @@ def html_to_excel(html_file, output_excel_file):
     # Create a list to store the extracted data
     data = []
     # Extract relevant data
-    # Find all <section> tags and extract the text content for each section
-    cards = soup.find_all('div', class_='v-md-textarea-editor')
+    # Find all <div> tags and extract the text content for each section
+    cards = soup.find_all('div', class_='vuepress-markdown-body')
 
     # Loop through each card and extract the relevant information
     for card in cards:
+            
             # Extract the site name (from the <a> tag inside <div class="title">)
-            site_name_tag = card.find('a', class_='blog_name_link')
-            site_name = site_name_tag.get_text(strip=True) if site_name_tag else 'N/A'
-            site_url = site_name_tag['href'] if site_name_tag else 'N/A'
+            site_name_tag = card.find('p', {'data-v-md-line': '5'})
+            if site_name_tag is None or 'SITE' not in site_name_tag.get_text():
+                site_name_tag = card.find('p', {'data-v-md-line': '6'})
+            if site_name_tag is None:
+                 site_name_tag = card.find('p', {'data-v-md-line': '10'})
+            print(site_name_tag)
+            site_url = site_name_tag.get_text(strip=True) if site_name_tag else 'N/A'
+                
 
             # Extract the description (inside <p> tags with data-v-md-line attributes)
             description_tag = card.find('p', {'data-v-md-line': '3'})
@@ -33,16 +39,13 @@ def html_to_excel(html_file, output_excel_file):
 
             # Extract the data size and all related data types as a single cell value
             data_size_block = card.find('p', {'data-v-md-line': '12'})
-            data_size_combined = '\n'.join(data_size_block.stripped_strings) if data_size_block else 'N/A'
-
-            # Extract image URLs (all <img> tags)
-            images = [img['src'] for img in card.find_all('img')] if card.find_all('img') else []
+            data_size_combined = ' '.join(data_size_block.stripped_strings) if data_size_block else 'N/A'
 
             # Append the extracted information to the data list
-            data.append([site_name, site_url, description, address, data_size_combined, ', '.join(images)])
+            data.append([site_url, description, address, data_size_combined])
 
         # Convert the data into a pandas DataFrame
-    df = pd.DataFrame(data, columns=['Site Name', 'Site URL', 'Description', 'Address', 'Data Size & Types', 'Images'])
+    df = pd.DataFrame(data, columns=['Site URL', 'Description', 'Address', 'Data Size & Types'])
 
         # Save the DataFrame to an Excel file
     df.to_excel(output_excel_file, index=False)
@@ -51,8 +54,9 @@ def html_to_excel(html_file, output_excel_file):
 
 # Example usage
 if __name__ == '__main__':
-    html_file = 'scraped_page.html'  # Path to the input HTML file
-    output_excel_file = 'organized_data.xlsx'  # Path to the output Excel file
+    html_file = './output/scraped_pages.html'  # Path to the input HTML file
+    output_excel_file = './output/organized_data.xlsx'  # Path to the output Excel file
 
     # Convert the HTML content into an Excel file
     html_to_excel(html_file, output_excel_file)
+ 
